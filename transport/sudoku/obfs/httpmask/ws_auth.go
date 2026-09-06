@@ -25,7 +25,6 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/binary"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -142,20 +141,4 @@ func (a *tunnelAuth) sign(mode TunnelMode, method, path string, ts int64) [16]by
 	var out [16]byte
 	copy(out[:], full[:16])
 	return out
-}
-
-func applyTunnelAuth(req *http.Request, auth *tunnelAuth, mode TunnelMode, method, path string) {
-	if auth == nil || req == nil {
-		return
-	}
-	token := auth.token(mode, method, path, time.Now())
-	if token == "" {
-		return
-	}
-	req.Header.Set(tunnelAuthHeaderKey, tunnelAuthHeaderPrefix+token)
-	if req.URL != nil {
-		q := req.URL.Query()
-		q.Set(tunnelAuthQueryKey, token)
-		req.URL.RawQuery = q.Encode()
-	}
 }
